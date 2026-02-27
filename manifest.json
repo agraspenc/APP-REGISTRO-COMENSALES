@@ -1,0 +1,35 @@
+{
+  "name": "Registro Escuadrones",
+  "short_name": "Comensales",
+  "description": "Sistema de registro diario de comensales por escuadrón",
+  "start_url": "./comensales.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#3b4a20",
+  "theme_color": "#3b4a20",
+  "lang": "es",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Panel Admin",
+      "short_name": "Admin",
+      "description": "Acceder al dashboard de administración",
+      "url": "./comensales.html"
+    }
+  ]
+}

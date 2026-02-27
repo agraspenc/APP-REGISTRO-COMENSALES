@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Escuadrones</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3b4a20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro Escuadrones">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Registro Escuadrones">
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f4;
+    --surface: #ffffff;
+    --surface2: #f0f0ec;
+    --olive: #556b2f;
+    --olive-dark: #3b4a20;
+    --olive-mid: #6e8038;
+    --olive-light: #8fa04a;
+    --olive-pale: #cfd9b0;
+    --olive-xpale: #eaf0db;
+    --text: #1c2210;
+    --muted: #728050;
+    --danger: #b84040;
+    --success: #3d6b2e;
+    --warning: #8a6a1a;
+    --border: #c5ceaa;
+    --border-light: #dce5c4;
+    --dieta: #b06020;
+    --dieta-bg: #fdf3e8;
+    --dieta-border: #e8c49a;
+    --celiaco: #5a3e8a;
+    --celiaco-bg: #f3eefa;
+    --celiaco-border: #c8aee8;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(85,107,47,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(85,107,47,0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 3px solid var(--olive);
+    padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 66px; position: sticky; top: 0;
+    background: var(--olive-dark); z-index: 100;
+    box-shadow: 0 3px 16px rgba(59,74,32,0.22);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 16px; letter-spacing: 1px;
+    color: var(--olive-pale);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-emblem {
+    width: 34px; height: 34px;
+    border: 2px solid var(--olive-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--olive-pale);
+    background: rgba(143,160,74,0.18); flex-shrink: 0;
+  }
+  .logo-text { line-height: 1.2; }
+  .logo-text small { display: block; font-size: 10px; letter-spacing: 2px; color: var(--olive-light); font-weight: 400; }
+  #clock { font-size: 21px; font-weight: 500; letter-spacing: 3px; color: #fff; font-family: 'DM Mono', monospace; }
+  #date-display { font-size: 9px; color: var(--olive-light); text-align: right; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+
+  .view { display: none; }
+
+  /* ── LOGIN ── */
+  #view-login {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: calc(100vh - 66px); padding: 40px; gap: 20px;
+    position: relative; z-index: 1;
+  }
+  .login-eyebrow { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--olive-mid); text-align: center; }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: 4px solid var(--olive); padding: 48px 40px; width: 100%; max-width: 460px;
+    box-shadow: 0 8px 40px rgba(59,74,32,0.10), 0 2px 8px rgba(59,74,32,0.06);
+  }
+  .login-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; margin-bottom: 4px; color: var(--olive-dark); line-height: 1.2; }
+  .login-subtitle { color: var(--muted); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 28px; border-bottom: 1px solid var(--border-light); padding-bottom: 18px; }
+
+  /* Info acceso */
+  .access-info {
+    background: var(--olive-xpale); border: 1px solid var(--border);
+    border-left: 3px solid var(--olive-light); padding: 12px 14px;
+    margin-bottom: 24px; font-size: 11px; color: var(--muted); line-height: 1.6;
+  }
+  .access-info strong { color: var(--olive-dark); display: block; margin-bottom: 4px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+
+  .field-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+  label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  select, input[type="text"], input[type="password"], input[type="number"] {
+    background: var(--bg); border: 1.5px solid var(--border);
+    color: var(--text); padding: 11px 13px;
+    font-family: 'DM Mono', monospace; font-size: 14px;
+    outline: none; width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    border-radius: var(--radius); appearance: none;
+  }
+  select:focus, input:focus { border-color: var(--olive); box-shadow: 0 0 0 3px rgba(85,107,47,0.12); }
+  select option { background: #f7f7f4; color: var(--text); }
+
+  textarea {
+    background: var(--bg); border: 1.5px solid var(--border);
+    color: var(--text); padding: 11px 13px;
+    font-family: 'DM Mono', monospace; font-size: 13px;
+    outline: none; width: 100%; resize: vertical; min-height: 70px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    border-radius: var(--radius); line-height: 1.5;
+  }
+  textarea:focus { border-color: var(--olive); box-shadow: 0 0 0 3px rgba(85,107,47,0.12); }
+  textarea:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 24px; font-family: 'DM Mono', monospace; font-size: 13px;
+    letter-spacing: 1px; font-weight: 500; cursor: pointer; border: none;
+    border-radius: var(--radius); transition: all 0.15s; width: 100%;
+  }
+  .btn-primary { background: var(--olive); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--olive-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(59,74,32,0.28); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .error-msg {
+    background: rgba(184,64,64,0.07); border: 1px solid rgba(184,64,64,0.35);
+    color: var(--danger); padding: 10px 14px; font-size: 12px;
+    border-radius: var(--radius); display: none; margin-bottom: 12px;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; border-radius: var(--radius);
+    margin-bottom: 28px; font-size: 12px; border: 1.5px solid;
+  }
+  .status-bar.open   { background: rgba(61,107,46,0.07); border-color: rgba(61,107,46,0.3); color: var(--success); }
+  .status-bar.closed { background: rgba(184,64,64,0.07); border-color: rgba(184,64,64,0.3); color: var(--danger); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot.green { background: var(--success); box-shadow: 0 0 5px var(--success); animation: pulse 2s infinite; }
+  .dot.red   { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 36px; flex-wrap: wrap; gap: 16px;
+    padding-bottom: 24px; border-bottom: 2px solid var(--olive-pale);
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -1px; color: var(--olive-dark); }
+  .page-title span { color: var(--olive); }
+  .page-meta { font-size: 10px; color: var(--olive-mid); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* ── REGISTER CARD ── */
+  .register-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-left: 4px solid var(--olive); padding: 32px 30px; margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(85,107,47,0.07);
+  }
+  .saved-card {
+    background: var(--olive-xpale); border: 1.5px solid var(--olive-pale);
+    border-left: 4px solid var(--success); padding: 24px 28px; margin-bottom: 28px;
+  }
+  .card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--olive-dark); margin-bottom: 22px; }
+
+  .number-input-wrap { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+  .number-input-wrap input[type="number"] { width: 160px; font-size: 36px; font-weight: 500; text-align: center; padding: 14px; letter-spacing: 3px; color: var(--olive-dark); }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .stepper-btn {
+    background: var(--olive-xpale); border: 1.5px solid var(--olive-pale);
+    color: var(--olive-dark); width: 46px; height: 46px; font-size: 26px;
+    cursor: pointer; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; flex-shrink: 0; font-family: 'DM Mono', monospace;
+  }
+  .stepper-btn:hover:not(:disabled) { background: var(--olive); color: #fff; border-color: var(--olive); }
+  .stepper-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── OBSERVACIONES ── */
+  .obs-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+  }
+
+  .obs-card {
+    border: 1.5px solid; padding: 18px 18px 16px; border-radius: var(--radius);
+  }
+  .obs-card.dieta   { background: var(--dieta-bg);   border-color: var(--dieta-border);   border-left: 4px solid var(--dieta); }
+  .obs-card.celiaco { background: var(--celiaco-bg); border-color: var(--celiaco-border); border-left: 4px solid var(--celiaco); }
+
+  .obs-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .obs-icon {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .obs-icon.dieta   { background: var(--dieta);   color: #fff; }
+  .obs-icon.celiaco { background: var(--celiaco); color: #fff; }
+
+  .obs-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  }
+  .obs-title.dieta   { color: var(--dieta); }
+  .obs-title.celiaco { color: var(--celiaco); }
+
+  .obs-subtitle { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* Stepper compacto para obs */
+  .obs-number-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .obs-number-wrap input[type="number"] {
+    width: 80px; font-size: 22px; font-weight: 700; text-align: center;
+    padding: 8px 6px; letter-spacing: 2px;
+  }
+  .obs-number-wrap input.dieta   { color: var(--dieta);   border-color: var(--dieta-border); }
+  .obs-number-wrap input.celiaco { color: var(--celiaco); border-color: var(--celiaco-border); }
+
+  .obs-step {
+    background: transparent; border: 1.5px solid;
+    width: 32px; height: 32px; font-size: 18px;
+    cursor: pointer; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s; flex-shrink: 0; font-family: 'DM Mono', monospace;
+  }
+  .obs-step.dieta   { border-color: var(--dieta-border);   color: var(--dieta); }
+  .obs-step.celiaco { border-color: var(--celiaco-border); color: var(--celiaco); }
+  .obs-step.dieta:hover:not(:disabled)   { background: var(--dieta);   color: #fff; }
+  .obs-step.celiaco:hover:not(:disabled) { background: var(--celiaco); color: #fff; }
+  .obs-step:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .obs-textarea { font-size: 12px !important; min-height: 56px !important; }
+  .obs-textarea.dieta   { border-color: var(--dieta-border); }
+  .obs-textarea.celiaco { border-color: var(--celiaco-border); }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--olive-mid);
+    margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+
+  /* ── TABLE ── */
+  .table-wrap { background: var(--surface); border: 1.5px solid var(--border); overflow: hidden; margin-bottom: 28px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+  th {
+    text-align: left; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 11px 14px; border-bottom: 1.5px solid var(--border);
+    background: var(--olive-xpale); white-space: nowrap;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--olive-xpale); }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px; font-weight: 500; white-space: nowrap; }
+  .badge-ok      { background: rgba(61,107,46,0.1);  color: var(--success); border: 1px solid rgba(61,107,46,0.25); }
+  .badge-pending { background: rgba(138,106,26,0.1); color: var(--warning); border: 1px solid rgba(138,106,26,0.25); }
+  .badge-missing { background: rgba(184,64,64,0.08); color: var(--danger);  border: 1px solid rgba(184,64,64,0.22); }
+  .badge-dieta   { background: rgba(176,96,32,0.10); color: var(--dieta);   border: 1px solid rgba(176,96,32,0.25); }
+  .badge-celiaco { background: rgba(90,62,138,0.10); color: var(--celiaco); border: 1px solid rgba(90,62,138,0.25); }
+
+  /* Obs pill en tabla */
+  .obs-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  /* ── ADMIN STATS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1.5px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 6px rgba(85,107,47,0.06); }
+  .stat-card.highlight { border-color: var(--olive); border-top: 3px solid var(--olive); }
+  .stat-card.dieta-card  { border-top: 3px solid var(--dieta);   border-color: var(--dieta-border); }
+  .stat-card.celiaco-card{ border-top: 3px solid var(--celiaco); border-color: var(--celiaco-border); }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; line-height: 1; color: var(--olive); margin-bottom: 2px; }
+  .stat-value.dieta-v  { color: var(--dieta); }
+  .stat-value.celiaco-v{ color: var(--celiaco); }
+  .stat-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .progress-bar-wrap { margin-top: 12px; height: 4px; background: var(--border-light); border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--olive); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* ── TOTAL BANNER ── */
+  .total-banner {
+    background: var(--olive-dark); border: 2px solid var(--olive);
+    padding: 24px 30px; margin-bottom: 28px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    box-shadow: 0 4px 20px rgba(59,74,32,0.2);
+  }
+  .total-label  { font-size: 10px; color: var(--olive-light); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .total-number { font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800; color: var(--olive-pale); line-height: 1; }
+  .total-sub    { font-family: 'Newsreader', serif; font-style: italic; font-size: 14px; color: var(--olive-light); margin-top: 4px; }
+
+  /* Mini totales en banner */
+  .banner-mini-obs {
+    display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  }
+  .banner-mini {
+    text-align: center; padding: 12px 16px; border-radius: var(--radius);
+  }
+  .banner-mini.d { background: rgba(176,96,32,0.25); border: 1px solid rgba(176,96,32,0.4); }
+  .banner-mini.c { background: rgba(90,62,138,0.25); border: 1px solid rgba(90,62,138,0.4); }
+  .banner-mini-num { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
+  .banner-mini.d .banner-mini-num { color: #f0c080; }
+  .banner-mini.c .banner-mini-num { color: #c8a8f0; }
+  .banner-mini-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+  .banner-mini.d .banner-mini-lbl { color: rgba(240,192,128,0.8); }
+  .banner-mini.c .banner-mini-lbl { color: rgba(200,168,240,0.8); }
+
+  /* ── NAV ── */
+  nav { display: flex; gap: 2px; margin-bottom: 28px; border-bottom: 2px solid var(--border); }
+  .nav-tab {
+    padding: 10px 20px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent;
+    transition: all 0.15s; background: none; border-left: none; border-right: none; border-top: none;
+    font-family: 'DM Mono', monospace; margin-bottom: -2px;
+  }
+  .nav-tab.active { color: var(--olive); border-bottom-color: var(--olive); }
+  .nav-tab:hover:not(.active) { color: var(--olive-dark); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── DATE NAV ── */
+  .date-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .date-nav button {
+    background: var(--surface); border: 1.5px solid var(--border); color: var(--olive-dark);
+    padding: 8px 14px; cursor: pointer; font-family: 'DM Mono', monospace;
+    font-size: 12px; border-radius: var(--radius); transition: all 0.15s;
+  }
+  .date-nav button:hover { border-color: var(--olive); color: var(--olive); }
+  .date-nav span { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--olive-dark); }
+
+  /* ── LOGOUT ── */
+  .logout-btn {
+    background: none; border: 1.5px solid var(--border-light); color: var(--muted);
+    padding: 8px 16px; font-family: 'DM Mono', monospace; font-size: 11px;
+    cursor: pointer; border-radius: var(--radius); transition: all 0.15s;
+  }
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--olive-dark); color: #fff; border-left: 4px solid var(--olive-light);
+    padding: 13px 20px; font-size: 13px; z-index: 1000;
+    transform: translateY(16px); opacity: 0; transition: all 0.28s;
+    border-radius: var(--radius); max-width: 320px;
+    box-shadow: 0 6px 24px rgba(59,74,32,0.25);
+  }
+  #toast.show    { transform: translateY(0); opacity: 1; }
+  #toast.success { border-left-color: var(--success); }
+  #toast.error   { border-left-color: var(--danger); background: #4a1e1e; }
+
+  .empty-state { text-align: center; padding: 36px; color: var(--muted); font-size: 12px; }
+
+  /* Obs note in saved card */
+  .obs-saved-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+  .obs-saved-item { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+  .obs-saved-item span.num { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+
+  @media (max-width: 640px) {
+    header { padding: 0 16px; }
+    main { padding: 24px 16px 60px; }
+    .page-title { font-size: 28px; }
+    .total-number { font-size: 48px; }
+    #view-login { padding: 20px; }
+    .login-card { padding: 30px 22px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .obs-grid { grid-template-columns: 1fr; }
+    .total-banner { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-emblem">⬡</div>
+    <div class="logo-text">
+      COMENSALES
+      <small>Sistema de Registro — Instituto</small>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div id="clock">--:--:--</div>
+    <div id="date-display">--</div>
+  </div>
+</header>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="view-login" class="view" style="display:flex;">
+  <div class="login-eyebrow">⬡ &nbsp;Sistema de Gestión de Comensales</div>
+  <div class="login-card">
+    <div class="login-title">Registro de<br>Comensales</div>
+    <div class="login-subtitle">Identificación de acceso</div>
+
+    <!-- Nota acceso compartido -->
+    <div class="access-info">
+      <strong>ℹ Acceso por enlace compartido</strong>
+      Este sistema puede abrirse desde cualquier dispositivo con el enlace del archivo.
+      Seleccioná tu tipo de acceso e ingresá la clave correspondiente para continuar.
+    </div>
+
+    <div class="field-group">
+      <label>Tipo de acceso</label>
+      <select id="login-type">
+        <option value="">— Seleccionar —</option>
+        <option value="aula">Responsable de Escuadrón</option>
+        <option value="admin">Administrador / Coordinador</option>
+      </select>
+    </div>
+
+    <div class="field-group" id="aula-select-group" style="display:none;">
+      <label>Seleccionar Escuadrón</label>
+      <select id="aula-select">
+        <option value="">— Seleccionar Escuadrón —</option>
+        <option value="A">Escuadrón A</option>
+        <option value="B">Escuadrón B</option>
+        <option value="C">Escuadrón C</option>
+        <option value="D">Escuadrón D</option>
+        <option value="E">Escuadrón E</option>
+        <option value="F">Escuadrón F</option>
+        <option value="G">Escuadrón G</option>
+        <option value="H">Escuadrón H</option>
+        <option value="I">Escuadrón I</option>
+        <option value="J">Escuadrón J</option>
+        <option value="K">Escuadrón K</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Clave de acceso</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div class="error-msg" id="login-error">Clave incorrecta o selección incompleta.</div>
+    <button class="btn btn-primary" onclick="doLogin()">Ingresar →</button>
+
+    <div style="margin-top:20px; font-size:10px; color:var(--muted); text-align:center; letter-spacing:0.5px; border-top:1px solid var(--border-light); padding-top:16px;">
+      Clave responsables: <strong style="color:var(--olive);">Instituto2024</strong> &nbsp;·&nbsp; Admin: <strong style="color:var(--olive);">Admin2024</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ESCUADRÓN VIEW ══════════════ -->
+<div id="view-aula" class="view" style="display:none;">
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-meta">Responsable de Escuadrón</div>
+        <div class="page-title">ESCUADRÓN <span id="current-aula-label">—</span></div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+
+    <div id="aula-status-bar" class="status-bar open">
+      <div class="dot green"></div>
+      <span id="aula-status-text">Registro habilitado hasta las 10:00 hs</span>
+    </div>
+
+    <!-- Formulario principal -->
+    <div class="register-card" id="register-card">
+      <div class="card-label">Registrar comensales para mañana</div>
+      <div class="card-title" id="tomorrow-date-label">Almuerzo del —</div>
+
+      <!-- Cantidad principal -->
+      <div style="margin-bottom:6px;">
+        <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Total comensales</div>
+        <div class="number-input-wrap">
+          <button class="stepper-btn" id="btn-minus" onclick="step(-1)">−</button>
+          <input type="number" id="count-input" value="0" min="0" max="999">
+          <button class="stepper-btn" id="btn-plus" onclick="step(1)">+</button>
+        </div>
+      </div>
+
+      <!-- Separador -->
+      <div style="border-top:1px solid var(--border-light); margin: 20px 0 22px;"></div>
+
+      <!-- Observaciones: Dieta y Celíacos -->
+      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Observaciones especiales</div>
+      <div class="obs-grid">
+
+        <!-- DIETA -->
+        <div class="obs-card dieta">
+          <div class="obs-header">
+            <div class="obs-icon dieta">🍽</div>
+            <div>
+              <div class="obs-title dieta">Dieta</div>
+            </div>
+          </div>
+          <div class="obs-subtitle">Cantidad con dieta especial</div>
+          <div class="obs-number-wrap">
+            <button class="obs-step dieta" id="dieta-minus" onclick="stepObs('dieta',-1)">−</button>
+            <input type="number" id="dieta-input" class="dieta" value="0" min="0" max="999">
+            <button class="obs-step dieta" id="dieta-plus" onclick="stepObs('dieta',1)">+</button>
+          </div>
+          <div class="obs-subtitle">Detalle / nombre(s)</div>
+          <textarea id="dieta-obs" class="obs-textarea dieta" placeholder="Ej: Alumno García — sin sal, sin grasa…" maxlength="300"></textarea>
+        </div>
+
+        <!-- CELÍACOS -->
+        <div class="obs-card celiaco">
+          <div class="obs-header">
+            <div class="obs-icon celiaco">🌾</div>
+            <div>
+              <div class="obs-title celiaco">Celíacos</div>
+            </div>
+          </div>
+          <div class="obs-subtitle">Cantidad con celiaquía</div>
+          <div class="obs-number-wrap">
+            <button class="obs-step celiaco" id="celiaco-minus" onclick="stepObs('celiaco',-1)">−</button>
+            <input type="number" id="celiaco-input" class="celiaco" value="0" min="0" max="999">
+            <button class="obs-step celiaco" id="celiaco-plus" onclick="stepObs('celiaco',1)">+</button>
+          </div>
+          <div class="obs-subtitle">Detalle / nombre(s)</div>
+          <textarea id="celiaco-obs" class="obs-textarea celiaco" placeholder="Ej: Alumno López — menú sin TACC…" maxlength="300"></textarea>
+        </div>
+
+      </div>
+
+      <button class="btn btn-primary" id="save-btn" onclick="saveRecord()">
+        ✓ &nbsp;Confirmar registro completo
+      </button>
+    </div>
+
+    <!-- Último registro guardado -->
+    <div id="today-record-info" style="display:none;">
+      <div class="saved-card">
+        <div class="card-label">Último registro confirmado</div>
+        <div style="display:flex;align-items:baseline;gap:14px;margin-top:8px;">
+          <div style="font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--success);line-height:1;" id="saved-count">—</div>
+          <div style="color:var(--muted);font-size:12px;line-height:1.6;">comensales<br>confirmados</div>
+        </div>
+        <div class="obs-saved-row" id="saved-obs-row"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px;" id="saved-timestamp">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">Historial del escuadrón</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Comensales</th><th>Dieta</th><th>Celíacos</th><th>Registrado a las</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="aula-history-body">
+          <tr><td colspan="6" class="empty-state">Sin registros anteriores.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════ ADMIN VIEW ══════════════ -->
+<div id="view-admin" class="view" style="display:none;">
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-meta">Panel de Administración</div>
+        <div class="page-title">DASHBOARD</div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+
+    <nav>
+      <button class="nav-tab active" onclick="showTab('tab-today',event)">Hoy</button>
+      <button class="nav-tab" onclick="showTab('tab-history',event)">Historial</button>
+    </nav>
+
+    <!-- TAB HOY -->
+    <div id="tab-today" class="tab-panel active">
+      <div id="admin-status-bar" class="status-bar open">
+        <div class="dot green"></div>
+        <span id="admin-status-text">Registro abierto — actualizando en tiempo real</span>
+      </div>
+
+      <!-- Total banner -->
+      <div class="total-banner">
+        <div>
+          <div class="total-label">Total comensales para mañana</div>
+          <div class="total-number" id="admin-total">0</div>
+          <div class="total-sub" id="admin-tomorrow-label">Almuerzo del —</div>
+        </div>
+        <div>
+          <div class="banner-mini-obs">
+            <div class="banner-mini d">
+              <div class="banner-mini-num" id="banner-dieta">0</div>
+              <div class="banner-mini-lbl">Con dieta</div>
+            </div>
+            <div class="banner-mini c">
+              <div class="banner-mini-num" id="banner-celiaco">0</div>
+              <div class="banner-mini-lbl">Celíacos</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:var(--olive-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">Escuadrones confirmados</div>
+          <div style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--olive-pale);" id="admin-confirmed-count">0/11</div>
+        </div>
+      </div>
+
+      <!-- Stats cards -->
+      <div class="stats-row">
+        <div class="stat-card highlight">
+          <div class="stat-label">Registrados</div>
+          <div class="stat-value" id="stat-registered">0</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="stat-bar" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pendientes</div>
+          <div class="stat-value" id="stat-pending" style="color:var(--warning);">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sin registrar</div>
+          <div class="stat-value" id="stat-missing" style="color:var(--danger);">0</div>
+        </div>
+        <div class="stat-card dieta-card">
+          <div class="stat-label">Total con dieta</div>
+          <div class="stat-value dieta-v" id="stat-dieta">0</div>
+        </div>
+        <div class="stat-card celiaco-card">
+          <div class="stat-label">Total celíacos</div>
+          <div class="stat-value celiaco-v" id="stat-celiaco">0</div>
+        </div>
+      </div>
+
+      <div class="section-title">Estado por escuadrón</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Escuadrón</th><th>Comensales</th><th>Dieta</th><th>Celíacos</th><th>Observaciones</th><th>Horario</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="admin-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB HISTORIAL -->
+    <div id="tab-history" class="tab-panel">
+      <div class="date-nav">
+        <button onclick="navHistory(-1)">← Anterior</button>
+        <span id="history-date-label">—</span>
+        <button onclick="navHistory(1)">Siguiente →</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Escuadrón</th><th>Comensales</th><th>Dieta</th><th>Celíacos</th><th>Observaciones</th><th>Horario</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="history-table-body"></tbody>
+        </table>
+      </div>
+
+      <div style="background:var(--olive-dark);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <span style="font-size:11px;color:var(--olive-light);letter-spacing:2px;text-transform:uppercase;">Total del día</span>
+        <div style="display:flex;gap:24px;align-items:center;">
+          <div style="text-align:center;">
+            <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(240,192,128,0.7);margin-bottom:2px;">Dieta</div>
+            <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#f0c080;" id="history-dieta">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(200,168,240,0.7);margin-bottom:2px;">Celíacos</div>
+            <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#c8a8f0;" id="history-celiaco">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--olive-light);margin-bottom:2px;">Total</div>
+            <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--olive-pale);" id="history-total">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══ CONFIG ═══
+const AULA_PASS   = 'Instituto2024';
+const ADMIN_PASS  = 'Admin2024';
+const ESCUADRONES = ['A','B','C','D','E','F','G','H','I','J','K'];
+const CUTOFF_HOUR = 10;
+
+let currentUser = null, currentAula = null, historyViewDate = null;
+
+// ═══ STORAGE ═══
+function getDayData(d)       { try { return JSON.parse(localStorage.getItem(`comensales_${d}`)) || {}; } catch(e){ return {}; } }
+function setDayData(d, data) { localStorage.setItem(`comensales_${d}`, JSON.stringify(data)); }
+
+function saveAulaRecord(d, aula, count, dieta, celiacos, dietaObs, celiacoObs) {
+  const data = getDayData(d);
+  data[aula] = {
+    count,
+    dieta:     dieta     || 0,
+    celiacos:  celiacos  || 0,
+    dietaObs:  dietaObs  || '',
+    celiacoObs:celiacoObs|| '',
+    timestamp: new Date().toISOString()
+  };
+  setDayData(d, data);
+}
+
+// ═══ DATE UTILS ═══
+function padZ(n)       { return String(n).padStart(2,'0'); }
+function getDateKey(d) { return `${d.getFullYear()}-${padZ(d.getMonth()+1)}-${padZ(d.getDate())}`; }
+function getTodayKey() { return getDateKey(new Date()); }
+function isOpen()      { return new Date().getHours() < CUTOFF_HOUR; }
+
+function formatDate(d) {
+  const days   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
+}
+function formatDateShort(d) { return `${padZ(d.getDate())}/${padZ(d.getMonth()+1)}/${d.getFullYear()}`; }
+function formatTime(iso)    { const d=new Date(iso); return `${padZ(d.getHours())}:${padZ(d.getMinutes())}:${padZ(d.getSeconds())}`; }
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══ CLOCK ═══
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = `${padZ(now.getHours())}:${padZ(now.getMinutes())}:${padZ(now.getSeconds())}`;
+  document.getElementById('date-display').textContent = formatDate(now).toUpperCase();
+  if (currentUser === 'aula')  updateAulaStatus();
+  if (currentUser === 'admin') updateAdminStatus();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══ LOGIN ═══
+document.getElementById('login-type').addEventListener('change', function() {
+  document.getElementById('aula-select-group').style.display = this.value === 'aula' ? 'block' : 'none';
+});
+document.getElementById('login-pass').addEventListener('keyup', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogin() {
+  const type = document.getElementById('login-type').value;
+  const pass = document.getElementById('login-pass').value;
+  const aula = document.getElementById('aula-select').value;
+  const err  = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  if (type === 'aula') {
+    if (!aula) { err.textContent='Seleccioná un escuadrón.'; err.style.display='block'; return; }
+    if (pass !== AULA_PASS) { err.textContent='Clave incorrecta.'; err.style.display='block'; return; }
+    currentUser = 'aula'; currentAula = aula; showAulaView();
+  } else if (type === 'admin') {
+    if (pass !== ADMIN_PASS) { err.textContent='Clave de administrador incorrecta.'; err.style.display='block'; return; }
+    currentUser = 'admin'; showAdminView();
+  } else {
+    err.textContent='Seleccioná un tipo de acceso.'; err.style.display='block';
+  }
+}
+
+function doLogout() {
+  currentUser = null; currentAula = null;
+  ['login-type','aula-select','login-pass'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('aula-select-group').style.display = 'none';
+  showView('view-login');
+}
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.style.display='none');
+  document.getElementById(id).style.display = id==='view-login' ? 'flex' : 'block';
+}
+
+// ═══ ESCUADRÓN VIEW ═══
+function showAulaView() {
+  showView('view-aula');
+  document.getElementById('current-aula-label').textContent = currentAula;
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById('tomorrow-date-label').textContent = `Almuerzo del ${formatDate(tomorrow)}`;
+  updateAulaStatus(); loadAulaHistory();
+}
+
+function setFormEnabled(on) {
+  const ids = ['count-input','btn-minus','btn-plus','save-btn',
+                'dieta-input','dieta-minus','dieta-plus','dieta-obs',
+                'celiaco-input','celiaco-minus','celiaco-plus','celiaco-obs'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.disabled = !on;
+  });
+  const card = document.getElementById('register-card');
+  card.style.opacity = on ? '1' : '0.5';
+  card.style.pointerEvents = on ? '' : 'none';
+}
+
+function updateAulaStatus() {
+  const open = isOpen();
+  const bar  = document.getElementById('aula-status-bar');
+  bar.className = open ? 'status-bar open' : 'status-bar closed';
+  bar.querySelector('.dot').className = open ? 'dot green' : 'dot red';
+  document.getElementById('aula-status-text').textContent = open
+    ? 'Registro habilitado hasta las 10:00 hs'
+    : 'Fuera de horario. El registro para mañana cierra a las 10:00 hs.';
+  setFormEnabled(open);
+
+  const rec     = getDayData(getTodayKey())[currentAula];
+  const infoDiv = document.getElementById('today-record-info');
+  if (rec) {
+    infoDiv.style.display = 'block';
+    document.getElementById('saved-count').textContent = rec.count;
+    document.getElementById('saved-timestamp').textContent =
+      `Guardado el ${formatDate(new Date(rec.timestamp))} a las ${formatTime(rec.timestamp)}`;
+
+    // Mostrar obs guardadas
+    const obsRow = document.getElementById('saved-obs-row');
+    let html = '';
+    if (rec.dieta > 0)    html += `<div class="obs-saved-item"><span class="num" style="color:var(--dieta);">${rec.dieta}</span> <span style="color:var(--muted);">con dieta${rec.dietaObs ? ' — '+escHtml(rec.dietaObs.substring(0,40)) : ''}</span></div>`;
+    if (rec.celiacos > 0) html += `<div class="obs-saved-item"><span class="num" style="color:var(--celiaco);">${rec.celiacos}</span> <span style="color:var(--muted);">celíacos${rec.celiacoObs ? ' — '+escHtml(rec.celiacoObs.substring(0,40)) : ''}</span></div>`;
+    if (!html) html = `<span style="font-size:11px;color:var(--muted);">Sin observaciones especiales.</span>`;
+    obsRow.innerHTML = html;
+  } else {
+    infoDiv.style.display = 'none';
+  }
+}
+
+function step(delta) {
+  const input = document.getElementById('count-input');
+  input.value = Math.max(0, (parseInt(input.value)||0) + delta);
+}
+
+function stepObs(type, delta) {
+  const input = document.getElementById(`${type}-input`);
+  input.value = Math.max(0, (parseInt(input.value)||0) + delta);
+}
+
+function saveRecord() {
+  if (!isOpen()) { showToast('Fuera de horario. No se puede registrar.', 'error'); return; }
+  const count      = parseInt(document.getElementById('count-input').value) || 0;
+  const dieta      = parseInt(document.getElementById('dieta-input').value) || 0;
+  const celiacos   = parseInt(document.getElementById('celiaco-input').value) || 0;
+  const dietaObs   = document.getElementById('dieta-obs').value.trim();
+  const celiacoObs = document.getElementById('celiaco-obs').value.trim();
+
+  if (dieta + celiacos > count) {
+    showToast('Las observaciones no pueden superar el total de comensales.', 'error'); return;
+  }
+
+  saveAulaRecord(getTodayKey(), currentAula, count, dieta, celiacos, dietaObs, celiacoObs);
+  showToast(`✓ Escuadrón ${currentAula}: ${count} comensales registrados.`, 'success');
+  updateAulaStatus(); loadAulaHistory();
+}
+
+function loadAulaHistory() {
+  const tbody = document.getElementById('aula-history-body');
+  const rows  = [];
+  for (let i = 1; i <= 30; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const rec = getDayData(getDateKey(d))[currentAula];
+    if (rec) {
+      const dietaPill   = rec.dieta   > 0 ? `<span class="badge badge-dieta">🍽 ${rec.dieta}</span>` : `<span style="color:var(--muted);">—</span>`;
+      const celiacoPill = rec.celiacos> 0 ? `<span class="badge badge-celiaco">🌾 ${rec.celiacos}</span>` : `<span style="color:var(--muted);">—</span>`;
+      rows.push(`<tr>
+        <td>${formatDateShort(d)}</td>
+        <td><strong>${rec.count}</strong></td>
+        <td>${dietaPill}</td>
+        <td>${celiacoPill}</td>
+        <td>${formatTime(rec.timestamp)}</td>
+        <td><span class="badge badge-ok">✓ Registrado</span></td>
+      </tr>`);
+    }
+  }
+  tbody.innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="6" class="empty-state">Sin registros anteriores.</td></tr>';
+}
+
+// ═══ ADMIN ═══
+function showAdminView() {
+  showView('view-admin');
+  historyViewDate = new Date(); historyViewDate.setDate(historyViewDate.getDate()-1);
+  updateAdminDashboard(); updateHistoryView();
+}
+
+function updateAdminStatus() {
+  const open = isOpen();
+  const bar  = document.getElementById('admin-status-bar');
+  bar.className = open ? 'status-bar open' : 'status-bar closed';
+  bar.querySelector('.dot').className = open ? 'dot green' : 'dot red';
+  document.getElementById('admin-status-text').textContent = open
+    ? 'Período de registro abierto — actualizando en tiempo real'
+    : 'Período de registro cerrado. Datos consolidados definitivos.';
+  updateAdminDashboard();
+}
+
+function updateAdminDashboard() {
+  const data     = getDayData(getTodayKey());
+  const open     = isOpen();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById('admin-tomorrow-label').textContent = `Almuerzo del ${formatDate(tomorrow)}`;
+
+  let total=0, dietas=0, celiacos=0, registered=0;
+  const rows = [];
+
+  ESCUADRONES.forEach(esq => {
+    const rec = data[esq];
+    if (rec) {
+      total    += rec.count;
+      dietas   += (rec.dieta||0);
+      celiacos += (rec.celiacos||0);
+      registered++;
+
+      // Observaciones text column
+      let obsHtml = '';
+      if (rec.dietaObs)    obsHtml += `<div style="font-size:11px;color:var(--dieta);">🍽 ${escHtml(rec.dietaObs.substring(0,50))}${rec.dietaObs.length>50?'…':''}</div>`;
+      if (rec.celiacoObs)  obsHtml += `<div style="font-size:11px;color:var(--celiaco);margin-top:2px;">🌾 ${escHtml(rec.celiacoObs.substring(0,50))}${rec.celiacoObs.length>50?'…':''}</div>`;
+      if (!obsHtml)        obsHtml = `<span style="color:var(--muted);font-size:11px;">—</span>`;
+
+      const dietaPill   = rec.dieta   > 0 ? `<span class="badge badge-dieta">🍽 ${rec.dieta}</span>`   : `<span style="color:var(--muted);">—</span>`;
+      const celiacoPill = rec.celiacos> 0 ? `<span class="badge badge-celiaco">🌾 ${rec.celiacos}</span>` : `<span style="color:var(--muted);">—</span>`;
+
+      rows.push(`<tr>
+        <td><strong>Escuadrón ${esq}</strong></td>
+        <td><strong>${rec.count}</strong></td>
+        <td>${dietaPill}</td>
+        <td>${celiacoPill}</td>
+        <td style="max-width:200px;">${obsHtml}</td>
+        <td>${formatTime(rec.timestamp)}</td>
+        <td><span class="badge badge-ok">✓ Registrado</span></td>
+      </tr>`);
+    } else {
+      rows.push(`<tr>
+        <td><strong>Escuadrón ${esq}</strong></td>
+        <td style="color:var(--muted);">—</td><td style="color:var(--muted);">—</td>
+        <td style="color:var(--muted);">—</td><td style="color:var(--muted);">—</td>
+        <td style="color:var(--muted);">—</td>
+        <td><span class="badge ${open?'badge-pending':'badge-missing'}">${open?'○ Pendiente':'✕ Sin registrar'}</span></td>
+      </tr>`);
+    }
+  });
+
+  document.getElementById('admin-table-body').innerHTML = rows.join('');
+  document.getElementById('admin-total').textContent     = total;
+  document.getElementById('banner-dieta').textContent    = dietas;
+  document.getElementById('banner-celiaco').textContent  = celiacos;
+  document.getElementById('admin-confirmed-count').textContent = `${registered}/11`;
+  document.getElementById('stat-registered').textContent = registered;
+  document.getElementById('stat-pending').textContent    = open ? (11-registered) : 0;
+  document.getElementById('stat-missing').textContent    = !open ? (11-registered) : 0;
+  document.getElementById('stat-dieta').textContent      = dietas;
+  document.getElementById('stat-celiaco').textContent    = celiacos;
+  document.getElementById('stat-bar').style.width        = `${(registered/11)*100}%`;
+}
+
+// ═══ TABS ═══
+function showTab(id, e) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
+  if (id === 'tab-history') updateHistoryView();
+}
+
+// ═══ HISTORIAL ═══
+function navHistory(delta) {
+  historyViewDate.setDate(historyViewDate.getDate()+delta);
+  updateHistoryView();
+}
+
+function updateHistoryView() {
+  document.getElementById('history-date-label').textContent = formatDate(historyViewDate);
+  const data  = getDayData(getDateKey(historyViewDate));
+  const tbody = document.getElementById('history-table-body');
+  let total=0, dietas=0, celiacos=0;
+  const rows = [];
+
+  ESCUADRONES.forEach(esq => {
+    const rec = data[esq];
+    if (rec) {
+      total    += rec.count;
+      dietas   += (rec.dieta||0);
+      celiacos += (rec.celiacos||0);
+
+      let obsHtml = '';
+      if (rec.dietaObs)   obsHtml += `<div style="font-size:11px;color:var(--dieta);">🍽 ${escHtml(rec.dietaObs.substring(0,50))}${rec.dietaObs.length>50?'…':''}</div>`;
+      if (rec.celiacoObs) obsHtml += `<div style="font-size:11px;color:var(--celiaco);margin-top:2px;">🌾 ${escHtml(rec.celiacoObs.substring(0,50))}${rec.celiacoObs.length>50?'…':''}</div>`;
+      if (!obsHtml)       obsHtml = `<span style="color:var(--muted);font-size:11px;">—</span>`;
+
+      const dp = rec.dieta   > 0 ? `<span class="badge badge-dieta">🍽 ${rec.dieta}</span>`   : `<span style="color:var(--muted);">—</span>`;
+      const cp = rec.celiacos> 0 ? `<span class="badge badge-celiaco">🌾 ${rec.celiacos}</span>` : `<span style="color:var(--muted);">—</span>`;
+
+      rows.push(`<tr>
+        <td><strong>Escuadrón ${esq}</strong></td>
+        <td><strong>${rec.count}</strong></td>
+        <td>${dp}</td><td>${cp}</td>
+        <td style="max-width:200px;">${obsHtml}</td>
+        <td>${formatTime(rec.timestamp)}</td>
+        <td><span class="badge badge-ok">✓ Registrado</span></td>
+      </tr>`);
+    } else {
+      rows.push(`<tr>
+        <td><strong>Escuadrón ${esq}</strong></td>
+        <td style="color:var(--muted);">—</td><td style="color:var(--muted);">—</td>
+        <td style="color:var(--muted);">—</td><td style="color:var(--muted);">—</td>
+        <td style="color:var(--muted);">—</td>
+        <td><span class="badge badge-missing">✕ Sin registrar</span></td>
+      </tr>`);
+    }
+  });
+
+  tbody.innerHTML = rows.join('');
+  document.getElementById('history-total').textContent   = total;
+  document.getElementById('history-dieta').textContent   = dietas;
+  document.getElementById('history-celiaco').textContent = celiacos;
+}
+
+// ═══ TOAST ═══
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${type}`;
+  setTimeout(() => { t.className=''; }, 3500);
+}
+
+setInterval(() => { if(currentUser==='admin') updateAdminDashboard(); }, 30000);
+
+// ═══ PWA — Service Worker ═══
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => {
+        console.log('[PWA] Service Worker registrado. Scope:', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              document.getElementById('pwa-update-banner').style.display = 'flex';
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[PWA] Error al registrar SW:', err));
+  });
+}
+
+function applyPWAUpdate() {
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    window.location.reload();
+  });
+}
+
+// ═══ PWA — Install prompt ═══
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('pwa-install-btn').style.display = 'flex';
+});
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(c => {
+    if (c.outcome === 'accepted') {
+      showToast('✓ App instalada correctamente.', 'success');
+      document.getElementById('pwa-install-btn').style.display = 'none';
+    }
+    deferredInstallPrompt = null;
+  });
+}
+window.addEventListener('appinstalled', () => {
+  showToast('✓ Registro Escuadrones instalada como app.', 'success');
+  document.getElementById('pwa-install-btn').style.display = 'none';
+});
+</script>
+
+<!-- PWA: Banner actualización -->
+<div id="pwa-update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:2000;background:#3b4a20;color:#cfd9b0;padding:14px 20px;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:3px solid #8fa04a;box-shadow:0 -4px 20px rgba(0,0,0,0.3);font-family:'DM Mono',monospace;font-size:13px;">
+  <span>🔄 &nbsp;Nueva versión disponible.</span>
+  <div style="display:flex;gap:10px;">
+    <button onclick="applyPWAUpdate()" style="background:#8fa04a;color:#1c2210;border:none;padding:8px 18px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;border-radius:3px;">Actualizar ahora</button>
+    <button onclick="this.closest('div[id]').style.display='none'" style="background:transparent;color:#8fa04a;border:1px solid #556b2f;padding:8px 14px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:3px;">Más tarde</button>
+  </div>
+</div>
+
+<!-- PWA: Botón instalar flotante -->
+<div id="pwa-install-btn" style="display:none;position:fixed;top:76px;right:20px;z-index:500;background:#556b2f;color:#fff;border:1.5px solid #8fa04a;padding:9px 16px;border-radius:3px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;box-shadow:0 4px 14px rgba(59,74,32,0.35);align-items:center;gap:8px;" onclick="installPWA()">
+  ⊕ &nbsp;Instalar app
+</div>
+
+</body>
+</html>
