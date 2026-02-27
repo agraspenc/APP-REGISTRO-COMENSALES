@@ -1111,6 +1111,137 @@ window.addEventListener('appinstalled', () => {
 <div id="pwa-install-btn" style="display:none;position:fixed;top:76px;right:20px;z-index:500;background:#556b2f;color:#fff;border:1.5px solid #8fa04a;padding:9px 16px;border-radius:3px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;box-shadow:0 4px 14px rgba(59,74,32,0.35);align-items:center;gap:8px;" onclick="installPWA()">
   ⊕ &nbsp;Instalar app
 </div>
+  <script>
+  // --- CONFIGURACIÓN ---
+  const WEB_APP_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI"; // La obtienes al publicar el Script
+  let currentUser = { type: '', name: '' };
+
+  // --- RELOJ Y FECHA ---
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('es-AR', { hour12: false });
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('date-display').textContent = now.toLocaleDateString('es-AR', options);
+    
+    // Etiqueta de "Mañana" para el registro
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const label = tomorrow.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+    if(document.getElementById('tomorrow-date-label')) 
+      document.getElementById('tomorrow-date-label').textContent = "Almuerzo del " + label;
+    if(document.getElementById('admin-tomorrow-label'))
+      document.getElementById('admin-tomorrow-label').textContent = "Almuerzo del " + label;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // --- LÓGICA DE LOGIN ---
+  function doLogin() {
+    const type = document.getElementById('login-type').value;
+    const pass = document.getElementById('login-pass').value;
+    const aula = document.getElementById('aula-select').value;
+    const errorMsg = document.getElementById('login-error');
+
+    if (type === 'admin' && pass === 'Admin2024') {
+      showView('view-admin');
+    } else if (type === 'aula' && aula !== '' && pass === 'Instituto2024') {
+      currentUser.type = 'aula';
+      currentUser.name = aula;
+      document.getElementById('current-aula-label').textContent = aula;
+      showView('view-aula');
+    } else {
+      errorMsg.style.display = 'block';
+    }
+  }
+
+  document.getElementById('login-type').addEventListener('change', function() {
+    document.getElementById('aula-select-group').style.display = this.value === 'aula' ? 'block' : 'none';
+  });
+
+  function showView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+    document.getElementById(viewId).style.display = 'block';
+    window.scrollTo(0,0);
+  }
+
+  function doLogout() {
+    location.reload(); // Forma más segura de limpiar datos de sesión
+  }
+
+  // --- CONTADORES (STEPPERS) ---
+  function step(val) {
+    const input = document.getElementById('count-input');
+    let current = parseInt(input.value) || 0;
+    input.value = Math.max(0, current + val);
+  }
+
+  function stepObs(type, val) {
+    const input = document.getElementById(type + '-input');
+    let current = parseInt(input.value) || 0;
+    input.value = Math.max(0, current + val);
+  }
+
+  // --- ENVÍO A GOOGLE SHEETS ---
+  async function saveRecord() {
+    const btn = document.getElementById('save-btn');
+    const data = {
+      escuadron: currentUser.name,
+      total: document.getElementById('count-input').value,
+      dieta_cant: document.getElementById('dieta-input').value,
+      dieta_obs: document.getElementById('dieta-obs').value,
+      celiaco_cant: document.getElementById('celiaco-input').value,
+      celiaco_obs: document.getElementById('celiaco-obs').value,
+      fecha_registro: new Date().toISOString()
+    };
+
+    if (data.total == 0) {
+      alert("Por favor, ingresa al menos 1 comensal.");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+
+    try {
+      // Aquí conectamos con el script que hicimos al principio de la charla
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Necesario para Google Apps Script
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      showToast("¡Registro guardado con éxito!");
+      confirmVisualSave(data);
+    } catch (err) {
+      showToast("Error al conectar con el servidor", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "✓ Confirmar registro completo";
+    }
+  }
+
+  function confirmVisualSave(data) {
+    document.getElementById('register-card').style.display = 'none';
+    document.getElementById('today-record-info').style.display = 'block';
+    document.getElementById('saved-count').textContent = data.total;
+    document.getElementById('saved-timestamp').textContent = "Confirmado hoy a las " + new Date().toLocaleTimeString();
+  }
+
+  function showToast(msg, isError = false) {
+    const t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'show' + (isError ? ' error' : ' success');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+  
+  // Registrar Service Worker para PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => console.log("SW local no registrado"));
+  }
+</script>
 
 </body>
 </html>
